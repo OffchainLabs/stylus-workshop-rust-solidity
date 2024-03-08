@@ -4,12 +4,10 @@
 # Configuration #
 # ------------- #
 
-# Variables that can be modified
-# (local|testnet)
-ENV="testnet"
-TESTNET_PK=
-TESTNET_ADDRESS=
-RECEIVER_ADDRESS=0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E
+# Load variables from .env file
+set -o allexport
+source scripts/.env
+set +o allexport
 
 # Helper constants
 DEPLOYMENT_TX_DATA_FILE=deployment_tx_data
@@ -19,7 +17,7 @@ DEPLOY_CONTRACT_RESULT_FILE=create_contract_result
 # Environment variables
 [ "$ENV" = "local" ] && RPC_URL=http://localhost:8547 || RPC_URL=https://stylus-testnet.arbitrum.io/rpc
 [ "$ENV" = "local" ] && MINTER_PK=0xb6b15c8cb491557369f3c7d2c287b053eb229daa9c22138887752191c9520659 || MINTER_PK=$TESTNET_PK
-[ "$ENV" = "local" ] && USER=0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E || USER=$
+[ "$ENV" = "local" ] && USER=0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E || USER=$TESTNET_ADDRESS
 
 # Other variables
 RECEIVER=$RECEIVER_ADDRESS
