@@ -64,7 +64,7 @@ rm $DEPLOY_CONTRACT_RESULT_FILE
 
 # Send activation transaction
 echo "Sending activation transaction..."
-if [ -f ACTIVATION_TX_DATA_FILE ]; then
+if [ -f ./$ACTIVATION_TX_DATA_FILE ]; then
     cast send --rpc-url $RPC_URL --private-key $MINTER_PK 0x0000000000000000000000000000000000000071 "activateProgram(address)" $art_contract_address > /dev/null
     rm $ACTIVATION_TX_DATA_FILE
 else
@@ -105,7 +105,7 @@ rm $DEPLOY_CONTRACT_RESULT_FILE
 
 # Send activation transaction
 echo "Sending activation transaction..."
-if [ -f ACTIVATION_TX_DATA_FILE ]; then
+if [ -f ./$ACTIVATION_TX_DATA_FILE ]; then
     cast send --rpc-url $RPC_URL --private-key $MINTER_PK 0x0000000000000000000000000000000000000071 "activateProgram(address)" $nft_contract_address > /dev/null
     rm $ACTIVATION_TX_DATA_FILE
 else
