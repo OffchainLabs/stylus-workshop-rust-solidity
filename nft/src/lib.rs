@@ -27,7 +27,6 @@ sol_interface! {
 
     interface ERC20 {
         function setNftContractAddress(address nft_token_contract_address) external;
-        function setMinBalanceToMintNft(uint256 min_balance_to_mint) external;
         function balanceOf(address owner) external returns(uint256);
     }
 }
@@ -60,8 +59,6 @@ sol! {
     error AlreadyInitialized();
     /// Minter does not have enough ERC-20 balance to mint an NFT
     error NotEnoughERC20Balance(uint256 balance, uint256 expected);
-    /// Caller is required to be the ERC20 contract, but it's not
-    error CallerIsNotERC20Contract(address caller);
     /// A call to an external contract failed
     error ExternalCallFailed();
 }
@@ -70,7 +67,6 @@ sol! {
 pub enum StylusNFTError {
     AlreadyInitialized(AlreadyInitialized),
     NotEnoughERC20Balance(NotEnoughERC20Balance),
-    CallerIsNotERC20Contract(CallerIsNotERC20Contract),
     Erc721Error(Erc721Error),
     ExternalCallFailed(ExternalCallFailed),
 }
@@ -80,7 +76,6 @@ impl Into<Vec<u8>> for StylusNFTError {
         match self {
             Self::AlreadyInitialized(err) => err.encode(),
             Self::NotEnoughERC20Balance(err) => err.encode(),
-            Self::CallerIsNotERC20Contract(err) => err.encode(),
             Self::Erc721Error(err) => err.into(),
             Self::ExternalCallFailed(err) => err.encode(),
         }
@@ -134,14 +129,10 @@ impl StylusNFT {
         Ok(())
     }
 
-    /// Mints an NFT from the ERC20 contract, reverts if the sender is a different address
-    pub fn mint_from_erc20_contract(&mut self, minter: Address) -> Result<()> {
-        if msg::sender() != self.erc20_token_contract_address.get() {
-            return Err(StylusNFTError::CallerIsNotERC20Contract(CallerIsNotERC20Contract {
-                caller: msg::sender(),
-            }));
-        }
-        self.erc721.mint(minter)?;
+    /// Mints an NFT to the specified address, and does not call onErc712Received
+    pub fn mint_to(&mut self, to: Address) -> Result<()> {
+        self.user_has_enough_erc20_token_balance(to)?;
+        self.erc721.mint(to)?;
         Ok(())
     }
 
@@ -207,12 +198,6 @@ impl StylusNFT {
         let config = Call::new();
         let _result = erc20_contract
             .set_nft_contract_address(config, contract::address())
-            .map_err(|_e| StylusNFTError::ExternalCallFailed(ExternalCallFailed {}))?;
-
-        // Setting the minimum balance to mint an NFT from the ERC-20 contract
-        let config = Call::new();
-        let _result = erc20_contract
-            .set_min_balance_to_mint_nft(config, ERC20_MIN_BALANCE_TO_MINT)
             .map_err(|_e| StylusNFTError::ExternalCallFailed(ExternalCallFailed {}))?;
 
         Ok(())
