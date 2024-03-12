@@ -2,9 +2,9 @@
 
 This repo contains an example of 3 contracts (an ERC-721 contract and an Art contract both written in Rust, and an ERC-20 contract written in Solidity) interacting with each other.
 
-The ERC-721 contract contains a basic Rust implementation of the standard, which calls the external Art contract to generate the image when invoking the `tokenURI` method. It is based on [Stylus workshop NFT](https://github.com/OffchainLabs/stylus-workshop-nft/) and the [Stylus ERC721](https://github.com/gvladika/stylus-erc721/) implementation.
+The ERC-721 contract contains a basic Rust implementation of the standard, which calls the external Art contract to generate the image when invoking the `tokenURI` method. It is based on the [Stylus workshop NFT](https://github.com/OffchainLabs/stylus-workshop-nft/) and the [Stylus ERC721](https://github.com/gvladika/stylus-erc721/) implementations.
 
-The Art contract contains a Rust implementation of a basic generative art algorithm that draws an image with different colors depending on the address and the token id being passed as inputs. It is based on [Stylus workshop NFT](https://github.com/OffchainLabs/stylus-workshop-nft/) implementation.
+The Art contract contains a Rust implementation of a basic generative art algorithm that draws an image with different colors depending on the address and the token id being passed as inputs. It is based on the [Stylus workshop NFT](https://github.com/OffchainLabs/stylus-workshop-nft/) implementation.
 
 The ERC-20 contract contains a basic Solidity implementation of the standard. It is based on OpenZeppelin's implementation.
 
@@ -92,7 +92,32 @@ See `forge create --help` for more information.
 
 ## Test script
 
-There's a test script available in [scripts/test-all](./scripts/test-all.sh) that performs all deployment and some tests on all 3 contracts. You can take a look at the different calls made to gain further insight in how these 3 contracts interact with each other.
+There's a test script available in [./scripts/test-all.sh](./scripts/test-all.sh) that performs all deployment and some tests on all 3 contracts. You can take a look at the different calls made to gain further insight in how these 3 contracts interact with each other.
+
+Alternatively, you can use the following flow for the most important actions:
+
+1. [./scripts/deploy.sh](./scripts/deploy.sh) to deploy all contracts and initialize them
+2. [./scripts/mintTokens.sh](./scripts/mintTokens.sh) to mint some ERC-20 tokens
+3. [./scripts/mintNft.sh](./scripts/mintNft.sh) to mint an NFT
+4. [./scripts/getBalance.sh](./scripts/getBalance.sh) to obtain the balance of the minter
+5. [./scripts/getTokenImage.sh](./scripts/getTokenImage.sh) to get the image generated for tokenId 0
+6. [./scripts/transferNft.sh](./scripts/transferNft.sh) to transfer the NFT 0 from the minter to the RECEIVER
+7. [./scripts/mintNftFromTokenContract.sh](./scripts/mintNftFromTokenContract.sh) to mint an NFT from the ERC-20 contract
+
+## How to get ETH for the Stylus testnet
+
+The Stylus testnet is an L3 chain that settles to Arbitrum Sepolia. The usual way of obtaining ETH is to bridge it from Arbitrum Sepolia through the [Arbitrum Bridge](https://bridge.arbitrum.io/?destinationChain=stylus-testnet&sourceChain=arbitrum-sepolia). You can find a list of Arbitrum Sepolia faucets [here](https://docs.arbitrum.io/stylus/reference/testnet-information#faucets).
+
+## Useful resources
+
+- [Stylus quickstart](https://docs.arbitrum.io/stylus/stylus-quickstart)
+- [Stylus by example](https://arbitrum-stylus-by-example.vercel.app/)
+- [Awesome Stylus](https://github.com/OffchainLabs/awesome-stylus)
+- [Counter program](https://github.com/OffchainLabs/stylus-workshop-counter)
+- [Interactions between Rust and Solidity](https://github.com/OffchainLabs/stylus-workshop-rust-solidity/)
+- [Workshop presentation]()
+- [Telegram group](https://t.me/arbitrum_stylus)
+- [Discord channel](https://discord.com/channels/585084330037084172/1146789176939909251)
 
 ## Stylus reference links
 
