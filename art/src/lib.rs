@@ -95,6 +95,7 @@ type Result<T, E = StylusNftArtError> = core::result::Result<T, E>;
 #[external]
 impl StylusNFTArt {
     /// Generates the art of a specific token_id
+    #[selector(name = "generateArt")]
     pub fn generate_art(&mut self, token_id: U256) -> Result<String> {
         // Call the NFT contract to get the owner
         let token_contract_address = self.token_contract_address.get();
