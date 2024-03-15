@@ -23,4 +23,4 @@ fi
 echo "Minting ERC-20 tokens..."
 cast send --rpc-url $RPC_URL --private-key $PRIVATE_KEY $ERC20_CONTRACT_ADDRESS "mint(uint256)" 20
 
-# ERC20_CONTRACT_ADDRESS=0xfB46929D9e4435a31843821Ce7dc57E4bfb90c29 ./scripts/mintTokens.sh
+# ERC20_CONTRACT_ADDRESS= ./scripts/mintTokens.sh

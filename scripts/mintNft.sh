@@ -23,4 +23,4 @@ fi
 echo "Minting NFT..."
 cast send --rpc-url $RPC_URL --private-key $PRIVATE_KEY $NFT_CONTRACT_ADDRESS "mint()"
 
-# NFT_CONTRACT_ADDRESS=0x48e77180db654b6A6C29fFfAb41d15B41C648F45 ./scripts/mintNft.sh
+# NFT_CONTRACT_ADDRESS= ./scripts/mintNft.sh
