@@ -121,7 +121,7 @@ The Stylus testnet is an L3 chain that settles to Arbitrum Sepolia. The usual wa
 - [Awesome Stylus](https://github.com/OffchainLabs/awesome-stylus)
 - [Counter program](https://github.com/OffchainLabs/stylus-workshop-counter)
 - [Interactions between Rust and Solidity](https://github.com/OffchainLabs/stylus-workshop-rust-solidity/)
-- [Workshop presentation]()
+- [Workshop presentation](https://docs.google.com/presentation/d/1jhdKN_IwZziIKoIO_YAUqOjA44sRu8vSTXNfa_2RGkk/edit?usp=sharing)
 - [Telegram group](https://t.me/arbitrum_stylus)
 - [Discord channel](https://discord.com/channels/585084330037084172/1146789176939909251)
 
