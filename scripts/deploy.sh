@@ -34,31 +34,20 @@ echo "----------------------"
 # Move to nft folder
 cd art
 
-# Prepare transactions data
-cargo stylus deploy -e $RPC_URL --private-key $PRIVATE_KEY --dry-run --output-tx-data-to-dir .
+# Deploy contract
+cargo stylus deploy -e $RPC_URL --private-key $PRIVATE_KEY > $DEPLOY_CONTRACT_RESULT_FILE
 
-# Get contract bytecode
-bytecode=$(cat $DEPLOYMENT_TX_DATA_FILE | od -An -v -tx1 | tr -d ' \n')
-rm $DEPLOYMENT_TX_DATA_FILE
-
-# Send transaction to blockchain
-echo "Sending contract creation transaction..."
-cast send --rpc-url $RPC_URL --private-key $PRIVATE_KEY --create $bytecode > $DEPLOY_CONTRACT_RESULT_FILE
-
-# Get contract address
-art_contract_address_str=$(cat $DEPLOY_CONTRACT_RESULT_FILE | sed -n 4p)
-art_contract_address_array=($art_contract_address_str)
-art_contract_address=${art_contract_address_array[1]}
-rm $DEPLOY_CONTRACT_RESULT_FILE
-
-# Send activation transaction
-echo "Sending activation transaction..."
-if [ -f ./$ACTIVATION_TX_DATA_FILE ]; then
-    cast send --rpc-url $RPC_URL --private-key $PRIVATE_KEY 0x0000000000000000000000000000000000000071 "activateProgram(address)" $art_contract_address > /dev/null
-    rm $ACTIVATION_TX_DATA_FILE
-else
-    echo "Not needed, contract already activated"
+# Get contract address (last "sed" command removes the color codes of the output)
+# (Note: last regex obtained from https://stackoverflow.com/a/51141872)
+art_contract_address_str=$(cat $DEPLOY_CONTRACT_RESULT_FILE | sed -n 2p)
+if ! [[ $art_contract_address_str == *0x* ]]
+then
+    # When the program needs activation, the output of the command is slightly different
+    art_contract_address_str=$(cat $DEPLOY_CONTRACT_RESULT_FILE | sed -n 3p)
 fi
+art_contract_address_array=($art_contract_address_str)
+art_contract_address=$(echo ${art_contract_address_array[2]} | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g')
+rm $DEPLOY_CONTRACT_RESULT_FILE
 
 # Final result
 echo "Art contract deployed and activated at address: $art_contract_address"
@@ -75,31 +64,20 @@ echo "----------------------"
 # Move to nft folder
 cd ../nft
 
-# Prepare transactions data
-cargo stylus deploy -e $RPC_URL --private-key $PRIVATE_KEY --dry-run --output-tx-data-to-dir .
+# Deploy contract
+cargo stylus deploy -e $RPC_URL --private-key $PRIVATE_KEY > $DEPLOY_CONTRACT_RESULT_FILE
 
-# Get contract bytecode
-bytecode=$(cat $DEPLOYMENT_TX_DATA_FILE | od -An -v -tx1 | tr -d ' \n')
-rm $DEPLOYMENT_TX_DATA_FILE
-
-# Send transaction to blockchain
-echo "Sending contract creation transaction..."
-cast send --rpc-url $RPC_URL --private-key $PRIVATE_KEY --create $bytecode > $DEPLOY_CONTRACT_RESULT_FILE
-
-# Get contract address
-nft_contract_address_str=$(cat $DEPLOY_CONTRACT_RESULT_FILE | sed -n 4p)
-nft_contract_address_array=($nft_contract_address_str)
-nft_contract_address=${nft_contract_address_array[1]}
-rm $DEPLOY_CONTRACT_RESULT_FILE
-
-# Send activation transaction
-echo "Sending activation transaction..."
-if [ -f ./$ACTIVATION_TX_DATA_FILE ]; then
-    cast send --rpc-url $RPC_URL --private-key $PRIVATE_KEY 0x0000000000000000000000000000000000000071 "activateProgram(address)" $nft_contract_address > /dev/null
-    rm $ACTIVATION_TX_DATA_FILE
-else
-    echo "Not needed, contract already activated"
+# Get contract address (last "sed" command removes the color codes of the output)
+# (Note: last regex obtained from https://stackoverflow.com/a/51141872)
+nft_contract_address_str=$(cat $DEPLOY_CONTRACT_RESULT_FILE | sed -n 2p)
+if ! [[ $nft_contract_address_str == *0x* ]]
+then
+    # When the program needs activation, the output of the command is slightly different
+    nft_contract_address_str=$(cat $DEPLOY_CONTRACT_RESULT_FILE | sed -n 3p)
 fi
+nft_contract_address_array=($nft_contract_address_str)
+nft_contract_address=$(echo ${nft_contract_address_array[2]} | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g')
+rm $DEPLOY_CONTRACT_RESULT_FILE
 
 # Final result
 echo "NFT contract deployed and activated at address: $nft_contract_address"

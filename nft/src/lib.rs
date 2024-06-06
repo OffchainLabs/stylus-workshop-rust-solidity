@@ -11,8 +11,7 @@ use alloy_sol_types::{sol, SolError};
 use stylus_sdk::{
     abi::Bytes, call::Call, contract, msg, prelude::*, storage::StorageAddress
 };
-use crate::erc721::{Erc721, Erc721Params};
-use erc721::Erc721Error;
+use crate::erc721::{Erc721, Erc721Params, Erc721Error};
 
 /// Initializes a custom, global allocator for Rust programs compiled to WASM.
 #[global_allocator]
@@ -91,13 +90,10 @@ impl From<Erc721Error> for StylusNFTError {
 /// Minimum balance on ERC-20 tokens that the minter must have to mint an NFT
 const ERC20_MIN_BALANCE_TO_MINT: U256 = uint!(10_U256);
 
-// Result wrapper
-type Result<T, E = StylusNFTError> = core::result::Result<T, E>;
-
 // Helper, private functions
 impl StylusNFT {
     /// Check if the minter has enough balance of the ERC-20 token configured
-    fn user_has_enough_erc20_token_balance(&mut self, account: Address) -> Result<()> {
+    fn user_has_enough_erc20_token_balance(&mut self, account: Address) -> Result<(), StylusNFTError> {
         let erc20_token_contract_address = self.erc20_token_contract_address.get();
         let erc20_token_contract = ERC20::new(erc20_token_contract_address);
         let config = Call::new();
@@ -122,7 +118,7 @@ impl StylusNFT {
 #[inherit(Erc721<StylusNFTParams>)]
 impl StylusNFT {
     /// Mints an NFT, but does not call onErc712Received
-    pub fn mint(&mut self) -> Result<()> {
+    pub fn mint(&mut self) -> Result<(), StylusNFTError> {
         let minter = msg::sender();
         self.user_has_enough_erc20_token_balance(minter)?;
         self.erc721.mint(minter)?;
@@ -130,14 +126,14 @@ impl StylusNFT {
     }
 
     /// Mints an NFT to the specified address, and does not call onErc712Received
-    pub fn mint_to(&mut self, to: Address) -> Result<()> {
+    pub fn mint_to(&mut self, to: Address) -> Result<(), StylusNFTError> {
         self.user_has_enough_erc20_token_balance(to)?;
         self.erc721.mint(to)?;
         Ok(())
     }
 
     /// Mints an NFT and calls onErc712Received with empty data
-    pub fn safe_mint(&mut self, to: Address) -> Result<()> {
+    pub fn safe_mint(&mut self, to: Address) -> Result<(), StylusNFTError> {
         self.user_has_enough_erc20_token_balance(to)?;
         Erc721::safe_mint(self, to, Vec::new())?;
         Ok(())
@@ -145,7 +141,7 @@ impl StylusNFT {
 
     /// Mints an NFT and calls onErc712Received with the specified data
     #[selector(name = "safeMint")]
-    pub fn safe_mint_with_data(&mut self, data: Bytes) -> Result<()> {
+    pub fn safe_mint_with_data(&mut self, data: Bytes) -> Result<(), StylusNFTError> {
         let minter = msg::sender();
         self.user_has_enough_erc20_token_balance(minter)?;
         Erc721::safe_mint(self, minter, data.0)?;
@@ -153,14 +149,14 @@ impl StylusNFT {
     }
 
     /// Burns an NFT
-    pub fn burn(&mut self, token_id: U256) -> Result<()> {
+    pub fn burn(&mut self, token_id: U256) -> Result<(), StylusNFTError> {
         // This function checks that msg::sender() owns the specified token_id
         self.erc721.burn(msg::sender(), token_id)?;
         Ok(())
     }
 
     /// Returns the image for the NFT
-    pub fn token_uri(&mut self, token_id: U256) -> Result<String> {
+    pub fn token_uri(&mut self, token_id: U256) -> Result<String, StylusNFTError> {
         let owner = self.erc721.owner_of(token_id)?;
         let art_contract_address = self.art_contract_address.get();
         let art_contract = NftArt::new(art_contract_address);
@@ -173,7 +169,7 @@ impl StylusNFT {
     }
 
     /// Initialize program
-    pub fn initialize(&mut self, art_contract_address: Address, erc20_token_contract_address: Address) -> Result<()> {
+    pub fn initialize(&mut self, art_contract_address: Address, erc20_token_contract_address: Address) -> Result<(), StylusNFTError> {
         let current_art_contract = self.art_contract_address.get();
         if !current_art_contract.is_zero() {
             return Err(StylusNFTError::AlreadyInitialized(AlreadyInitialized {}));
@@ -204,7 +200,7 @@ impl StylusNFT {
     }
 
     /// Getter for the art contract address
-    pub fn get_art_contract_address(&mut self) -> Result<Address> {
+    pub fn get_art_contract_address(&mut self) -> Result<Address, StylusNFTError> {
         Ok(self.art_contract_address.get())
     }
 }

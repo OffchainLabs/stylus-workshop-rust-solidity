@@ -95,14 +95,11 @@ impl From<Erc721Error> for Vec<u8> {
     }
 }
 
-/// Simplifies the result type for the contract's methods.
-type Result<T, E = Erc721Error> = core::result::Result<T, E>;
-
 // These methods aren't external, but are helpers used by external methods.
 // Methods marked as "pub" here are usable outside of the erc721 module (i.e. they're callable from lib.rs).
 impl<T: Erc721Params> Erc721<T> {
     /// Requires that msg::sender() is authorized to spend a given token
-    fn require_authorized_to_spend(&self, from: Address, token_id: U256) -> Result<()> {
+    fn require_authorized_to_spend(&self, from: Address, token_id: U256) -> Result<(), Erc721Error> {
         let owner = self.owner_of(token_id)?;
         if from != owner {
             return Err(Erc721Error::NotOwner(NotOwner {
@@ -131,7 +128,7 @@ impl<T: Erc721Params> Erc721<T> {
     /// Transfers `token_id` from `from` to `to`.
     /// This function does check that `from` is the owner of the token, but it does not check
     /// that `to` is not the zero address, as this function is usable for burning.
-    pub fn transfer(&mut self, token_id: U256, from: Address, to: Address) -> Result<()> {
+    pub fn transfer(&mut self, token_id: U256, from: Address, to: Address) -> Result<(), Erc721Error> {
         let mut owner = self.owners.setter(token_id);
         let previous_owner = owner.get();
         if previous_owner != from {
@@ -165,7 +162,7 @@ impl<T: Erc721Params> Erc721<T> {
         from: Address,
         to: Address,
         data: Vec<u8>,
-    ) -> Result<()> {
+    ) -> Result<(), Erc721Error> {
         if to.has_code() {
             let receiver = IERC721TokenReceiver::new(to);
             let received = receiver
@@ -190,13 +187,13 @@ impl<T: Erc721Params> Erc721<T> {
         from: Address,
         to: Address,
         data: Vec<u8>,
-    ) -> Result<()> {
+    ) -> Result<(), Erc721Error> {
         storage.borrow_mut().transfer(token_id, from, to)?;
         Self::call_receiver(storage, token_id, from, to, data)
     }
 
     /// Mints a new token and transfers it to `to`
-    pub fn mint(&mut self, to: Address) -> Result<()> {
+    pub fn mint(&mut self, to: Address) -> Result<(), Erc721Error> {
         let new_token_id = self.total_supply.get();
         self.total_supply.set(new_token_id + U256::from(1u8));
         self.transfer(new_token_id, Address::default(), to)?;
@@ -208,7 +205,7 @@ impl<T: Erc721Params> Erc721<T> {
         storage: &mut S,
         to: Address,
         data: Vec<u8>,
-    ) -> Result<()> {
+    ) -> Result<(), Erc721Error> {
         let this = storage.borrow_mut();
         let new_token_id = this.total_supply.get();
         this.total_supply.set(new_token_id + U256::from(1u8));
@@ -217,7 +214,7 @@ impl<T: Erc721Params> Erc721<T> {
     }
 
     /// Burns the token `token_id` from `from`
-    pub fn burn(&mut self, from: Address, token_id: U256) -> Result<()> {
+    pub fn burn(&mut self, from: Address, token_id: U256) -> Result<(), Erc721Error> {
         self.transfer(token_id, from, Address::default())?;
         Ok(())
     }
@@ -237,17 +234,17 @@ const ERC721_TOKEN_RECEIVER_ID: u32 = 0x150b7a02;
 #[external]
 impl<T: Erc721Params> Erc721<T> {
     /// Immutable NFT name.
-    pub fn name() -> Result<String> {
+    pub fn name() -> Result<String, Erc721Error> {
         Ok(T::NAME.into())
     }
 
     /// Immutable NFT symbol.
-    pub fn symbol() -> Result<String> {
+    pub fn symbol() -> Result<String, Erc721Error> {
         Ok(T::SYMBOL.into())
     }
 
     /// Whether the NFT supports a given standard.
-    pub fn supports_interface(interface: [u8; 4]) -> Result<bool> {
+    pub fn supports_interface(interface: [u8; 4]) -> Result<bool, Erc721Error> {
         if interface == [0xff; 4] {
             // special cased in the ERC165 standard
             return Ok(false);
@@ -261,12 +258,12 @@ impl<T: Erc721Params> Erc721<T> {
     }
 
     /// Gets the number of NFTs owned by an account.
-    pub fn balance_of(&self, owner: Address) -> Result<U256> {
+    pub fn balance_of(&self, owner: Address) -> Result<U256, Erc721Error> {
         Ok(self.balance.get(owner))
     }
 
     /// Gets the owner of the NFT, if it exists.
-    pub fn owner_of(&self, token_id: U256) -> Result<Address> {
+    pub fn owner_of(&self, token_id: U256) -> Result<Address, Erc721Error> {
         let owner = self.owners.get(token_id);
         if owner.is_zero() {
             return Err(Erc721Error::InvalidTokenId(InvalidTokenId { token_id }));
@@ -280,7 +277,7 @@ impl<T: Erc721Params> Erc721<T> {
         from: Address,
         to: Address,
         token_id: U256,
-    ) -> Result<()> {
+    ) -> Result<(), Erc721Error> {
         Self::safe_transfer_from_with_data(storage, from, to, token_id, Bytes(vec![]))
     }
 
@@ -295,7 +292,7 @@ impl<T: Erc721Params> Erc721<T> {
         to: Address,
         token_id: U256,
         data: Bytes,
-    ) -> Result<()> {
+    ) -> Result<(), Erc721Error> {
         if to.is_zero() {
             return Err(Erc721Error::TransferToZero(TransferToZero { token_id }));
         }
@@ -307,7 +304,7 @@ impl<T: Erc721Params> Erc721<T> {
     }
 
     /// Transfers the NFT.
-    pub fn transfer_from(&mut self, from: Address, to: Address, token_id: U256) -> Result<()> {
+    pub fn transfer_from(&mut self, from: Address, to: Address, token_id: U256) -> Result<(), Erc721Error> {
         if to.is_zero() {
             return Err(Erc721Error::TransferToZero(TransferToZero { token_id }));
         }
@@ -317,7 +314,7 @@ impl<T: Erc721Params> Erc721<T> {
     }
 
     /// Grants an account the ability to manage the sender's NFT.
-    pub fn approve(&mut self, approved: Address, token_id: U256) -> Result<()> {
+    pub fn approve(&mut self, approved: Address, token_id: U256) -> Result<(), Erc721Error> {
         let owner = self.owner_of(token_id)?;
 
         // require authorization
@@ -339,7 +336,7 @@ impl<T: Erc721Params> Erc721<T> {
     }
 
     /// Grants an account the ability to manage all of the sender's NFTs.
-    pub fn set_approval_for_all(&mut self, operator: Address, approved: bool) -> Result<()> {
+    pub fn set_approval_for_all(&mut self, operator: Address, approved: bool) -> Result<(), Erc721Error> {
         let owner = msg::sender();
         self.approved_for_all
             .setter(owner)
@@ -354,12 +351,12 @@ impl<T: Erc721Params> Erc721<T> {
     }
 
     /// Gets the account managing an NFT, or zero if unmanaged.
-    pub fn get_approved(&mut self, token_id: U256) -> Result<Address> {
+    pub fn get_approved(&mut self, token_id: U256) -> Result<Address, Erc721Error> {
         Ok(self.approved.get(token_id))
     }
 
     /// Determines if an account has been authorized to managing all of a user's NFTs.
-    pub fn is_approved_for_all(&mut self, owner: Address, operator: Address) -> Result<bool> {
+    pub fn is_approved_for_all(&mut self, owner: Address, operator: Address) -> Result<bool, Erc721Error> {
         Ok(self.approved_for_all.getter(owner).get(operator))
     }
 }

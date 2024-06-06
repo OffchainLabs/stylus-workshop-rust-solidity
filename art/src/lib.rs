@@ -5,10 +5,9 @@ extern crate alloc;
 mod utils;
 mod art;
 
-use alloy_primitives::Address;
-use alloy_sol_types::{sol, SolError};
-use stylus_sdk::{alloy_primitives::U256, prelude::*, call::Call, storage::StorageAddress};
-use std::string::FromUtf8Error;
+use alloy_primitives::{Address, U256};
+use alloy_sol_types::sol;
+use stylus_sdk::{prelude::*, call::Call, storage::StorageAddress};
 use base64::Engine;
 use fastrand::Rng;
 use crate::art::{Color, Image, Cell};
@@ -63,40 +62,20 @@ sol! {
 }
 
 /// Error definitions
+#[derive(SolidityError)]
 pub enum StylusNftArtError {
     /// Contract is already initialized
     AlreadyInitialized(AlreadyInitialized),
-    /// Converstion from utf8 yield an error
-    FromUtf8Error(FromUtf8Error),
     /// A call to an external contract failed
     ExternalCallFailed(ExternalCallFailed),
 }
-
-impl Into<Vec<u8>> for StylusNftArtError {
-    fn into(self) -> Vec<u8> {
-        match self {
-            Self::AlreadyInitialized(err) => err.encode(),
-            Self::FromUtf8Error(err) => err.into_bytes(),
-            Self::ExternalCallFailed(err) => err.encode(),
-        }
-    }
-}
-
-impl From<FromUtf8Error> for StylusNftArtError {
-    fn from(err: FromUtf8Error) -> Self {
-        StylusNftArtError::FromUtf8Error(err)
-    }
-}
-
-/// Result wrapper
-type Result<T, E = StylusNftArtError> = core::result::Result<T, E>;
 
 // Contract implementation
 #[external]
 impl StylusNFTArt {
     /// Generates the art of a specific token_id
     #[selector(name = "generateArt")]
-    pub fn generate_art(&mut self, token_id: U256) -> Result<String> {
+    pub fn generate_art(&mut self, token_id: U256) -> Result<String, StylusNftArtError> {
         // Call the NFT contract to get the owner
         let token_contract_address = self.token_contract_address.get();
         let token_contract = Nft::new(token_contract_address);
@@ -111,7 +90,7 @@ impl StylusNFTArt {
     
     /// Generates the art of a specific token_id and a specific address (assuming it's the owner)
     #[selector(name = "generateArt")]
-    pub fn generate_art_with_owner(&mut self, token_id: U256, owner: Address) -> Result<String> {
+    pub fn generate_art_with_owner(&mut self, token_id: U256, owner: Address) -> Result<String, StylusNftArtError> {
         let image = gen_art(owner, token_id);
         let image_png = image.make_png();
         let mut image_str = String::from("data:image/png;base64,");
@@ -120,7 +99,7 @@ impl StylusNFTArt {
     }
 
     /// Initialize program
-    pub fn initialize(&mut self, token_contract_address: Address) -> Result<()> {
+    pub fn initialize(&mut self, token_contract_address: Address) -> Result<(), StylusNftArtError> {
         let current_contract = self.token_contract_address.get();
         if !current_contract.is_zero() {
             return Err(StylusNftArtError::AlreadyInitialized(AlreadyInitialized {}));
@@ -130,7 +109,7 @@ impl StylusNFTArt {
     }
 
     /// Getter for the art contract address
-    pub fn get_token_contract_address(&mut self) -> Result<Address> {
+    pub fn get_token_contract_address(&mut self) -> Result<Address, StylusNftArtError> {
         Ok(self.token_contract_address.get())
     }
 }

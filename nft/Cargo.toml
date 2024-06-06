@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-stylus-sdk = { version = "0.4.3", features = ["docs"] }
+stylus-sdk = { version = "0.5.0", features = ["docs"] }
 stylus-proc = "0.4.3"
 alloy-primitives = "0.3.1"
 alloy-sol-types = "0.3.1"
@@ -14,7 +14,7 @@ wee_alloc = "0.4.5"
 export-abi = ["stylus-sdk/export-abi"]
 
 [lib]
-crate-type = ["staticlib", "cdylib"]
+crate-type = ["lib", "cdylib"]
 
 [profile.release]
 codegen-units = 1
