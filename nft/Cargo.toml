@@ -4,11 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-stylus-sdk = { version = "0.5.0", features = ["docs"] }
-stylus-proc = "0.4.3"
-alloy-primitives = "0.3.1"
-alloy-sol-types = "0.3.1"
-wee_alloc = "0.4.5"
+stylus-sdk = "0.6.0"
+alloy-sol-types = "=0.7.6"
 
 [features]
 export-abi = ["stylus-sdk/export-abi"]

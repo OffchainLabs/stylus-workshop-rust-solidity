@@ -1,21 +1,20 @@
-#![cfg_attr(not(feature = "export-abi"), no_main)]
 extern crate alloc;
 
 // Modules and imports
 mod utils;
 mod art;
 
-use alloy_primitives::{Address, U256};
+use stylus_sdk::{
+    prelude::*,
+    call::Call,
+    storage::StorageAddress,
+    alloy_primitives::{Address, U256}
+};
 use alloy_sol_types::sol;
-use stylus_sdk::{prelude::*, call::Call, storage::StorageAddress};
 use base64::Engine;
 use fastrand::Rng;
 use crate::art::{Color, Image, Cell};
 use crate::utils::FnvHasher;
-
-/// Initializes a custom, global allocator for Rust programs compiled to WASM.
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 /// Generates the image for a given NFT token ID
 pub fn gen_art(address: Address, token_id: U256) -> Image<32, 32> {
@@ -48,7 +47,7 @@ sol_interface! {
 }
 
 /// Entrypoint for Art contract
-#[solidity_storage]
+#[storage]
 #[entrypoint]
 pub struct StylusNFTArt {
     /// The NFT contract that this Art contract delivers the art for
@@ -71,7 +70,7 @@ pub enum StylusNftArtError {
 }
 
 // Contract implementation
-#[external]
+#[public]
 impl StylusNFTArt {
     /// Generates the art of a specific token_id
     #[selector(name = "generateArt")]

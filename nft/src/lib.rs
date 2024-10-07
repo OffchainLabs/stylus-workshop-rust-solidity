@@ -1,21 +1,20 @@
-// Only run this as a WASM if the export-abi feature is not set.
-#![cfg_attr(not(any(feature = "export-abi", test)), no_main)]
 extern crate alloc;
 
 // Modules and imports
 mod erc721;
 
-use alloy_primitives::{Address, uint, U256};
-use alloy_sol_types::{sol, SolError};
 /// Import the Stylus SDK along with alloy primitive types for use in our program.
 use stylus_sdk::{
-    abi::Bytes, call::Call, contract, msg, prelude::*, storage::StorageAddress
+    abi::Bytes,
+    call::Call,
+    contract,
+    msg,
+    prelude::*,
+    storage::StorageAddress,
+    alloy_primitives::{Address, uint, U256}
 };
-use crate::erc721::{Erc721, Erc721Params, Erc721Error};
-
-/// Initializes a custom, global allocator for Rust programs compiled to WASM.
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+use alloy_sol_types::sol;
+use crate::erc721::{Erc721, Erc721Params};
 
 // Interfaces for the Art contract and the ERC20 contract
 sol_interface! {
@@ -63,28 +62,11 @@ sol! {
 }
 
 /// Represents the ways methods may fail.
+#[derive(SolidityError)]
 pub enum StylusNFTError {
     AlreadyInitialized(AlreadyInitialized),
     NotEnoughERC20Balance(NotEnoughERC20Balance),
-    Erc721Error(Erc721Error),
     ExternalCallFailed(ExternalCallFailed),
-}
-
-impl Into<Vec<u8>> for StylusNFTError {
-    fn into(self) -> Vec<u8> {
-        match self {
-            Self::AlreadyInitialized(err) => err.encode(),
-            Self::NotEnoughERC20Balance(err) => err.encode(),
-            Self::Erc721Error(err) => err.into(),
-            Self::ExternalCallFailed(err) => err.encode(),
-        }
-    }
-}
-
-impl From<Erc721Error> for StylusNFTError {
-    fn from(err: Erc721Error) -> Self {
-        StylusNFTError::Erc721Error(err)
-    }
 }
 
 /// Minimum balance on ERC-20 tokens that the minter must have to mint an NFT
@@ -114,11 +96,11 @@ impl StylusNFT {
     }
 }
 
-#[external]
+#[public]
 #[inherit(Erc721<StylusNFTParams>)]
 impl StylusNFT {
     /// Mints an NFT, but does not call onErc712Received
-    pub fn mint(&mut self) -> Result<(), StylusNFTError> {
+    pub fn mint(&mut self) -> Result<(), Vec<u8>> {
         let minter = msg::sender();
         self.user_has_enough_erc20_token_balance(minter)?;
         self.erc721.mint(minter)?;
@@ -126,14 +108,14 @@ impl StylusNFT {
     }
 
     /// Mints an NFT to the specified address, and does not call onErc712Received
-    pub fn mint_to(&mut self, to: Address) -> Result<(), StylusNFTError> {
+    pub fn mint_to(&mut self, to: Address) -> Result<(), Vec<u8>> {
         self.user_has_enough_erc20_token_balance(to)?;
         self.erc721.mint(to)?;
         Ok(())
     }
 
     /// Mints an NFT and calls onErc712Received with empty data
-    pub fn safe_mint(&mut self, to: Address) -> Result<(), StylusNFTError> {
+    pub fn safe_mint(&mut self, to: Address) -> Result<(), Vec<u8>> {
         self.user_has_enough_erc20_token_balance(to)?;
         Erc721::safe_mint(self, to, Vec::new())?;
         Ok(())
@@ -141,7 +123,7 @@ impl StylusNFT {
 
     /// Mints an NFT and calls onErc712Received with the specified data
     #[selector(name = "safeMint")]
-    pub fn safe_mint_with_data(&mut self, data: Bytes) -> Result<(), StylusNFTError> {
+    pub fn safe_mint_with_data(&mut self, data: Bytes) -> Result<(), Vec<u8>> {
         let minter = msg::sender();
         self.user_has_enough_erc20_token_balance(minter)?;
         Erc721::safe_mint(self, minter, data.0)?;
@@ -149,14 +131,15 @@ impl StylusNFT {
     }
 
     /// Burns an NFT
-    pub fn burn(&mut self, token_id: U256) -> Result<(), StylusNFTError> {
+    pub fn burn(&mut self, token_id: U256) -> Result<(), Vec<u8>> {
         // This function checks that msg::sender() owns the specified token_id
         self.erc721.burn(msg::sender(), token_id)?;
         Ok(())
     }
 
     /// Returns the image for the NFT
-    pub fn token_uri(&mut self, token_id: U256) -> Result<String, StylusNFTError> {
+    #[selector(name = "tokenURI")]
+    pub fn token_uri(&mut self, token_id: U256) -> Result<String, Vec<u8>> {
         let owner = self.erc721.owner_of(token_id)?;
         let art_contract_address = self.art_contract_address.get();
         let art_contract = NftArt::new(art_contract_address);

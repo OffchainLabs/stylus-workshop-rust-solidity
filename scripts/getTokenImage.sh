@@ -21,11 +21,11 @@ fi
 
 # Generate art
 echo "Generating art..."
-nft_art_image=$(cast call --rpc-url $RPC_URL $NFT_CONTRACT_ADDRESS "tokenUri(uint256) (string)" 0)
+nft_art_image=$(cast call --rpc-url $RPC_URL $NFT_CONTRACT_ADDRESS "tokenURI(uint256) (string)" 0)
 echo "NFT image: $nft_art_image"
 
 # Create a PNG file
 filename="images/tokenImage_0_$(date +%s).png"
-base64 -d <<< ${nft_art_image/"data:image/png;base64,"/} > $filename
+base64 -di <<< ${nft_art_image/"data:image/png;base64,"/} > $filename
 
 # NFT_CONTRACT_ADDRESS= ./scripts/getTokenImage.sh
