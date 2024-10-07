@@ -10,7 +10,6 @@ use stylus_sdk::{
     contract,
     msg,
     prelude::*,
-    storage::StorageAddress,
     alloy_primitives::{Address, uint, U256}
 };
 use alloy_sol_types::sol;
@@ -43,8 +42,8 @@ impl Erc721Params for StylusNFTParams {
 sol_storage! {
     #[entrypoint]
     struct StylusNFT {
-        StorageAddress art_contract_address;
-        StorageAddress erc20_token_contract_address;
+        address art_contract_address;
+        address erc20_token_contract_address;
 
         #[borrow] // Allows erc721 to access MyToken's storage and make calls
         Erc721<StylusNFTParams> erc721;

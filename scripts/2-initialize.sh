@@ -10,9 +10,9 @@ source scripts/.env
 set +o allexport
 
 # Optionally, add the contract addresses here
-# export ART_CONTRACT_ADDRESS=0xd1aa1b583f2c086d0964600e0c79a95acbc30a65
-# export NFT_CONTRACT_ADDRESS=0xd01207dd6eb9359f7572f658de0cb4ec98858da5
-# export ERC20_CONTRACT_ADDRESS=0xb8F30164C4D1f62155F7a1115E68e605069689E4
+# export ART_CONTRACT_ADDRESS=
+# export NFT_CONTRACT_ADDRESS=
+# export ERC20_CONTRACT_ADDRESS=
 
 # -------------- #
 # Initial checks #

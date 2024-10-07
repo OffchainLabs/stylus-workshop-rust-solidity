@@ -92,20 +92,18 @@ See `forge create --help` for more information.
 
 ## Test script
 
-There's a test script available in [./scripts/test-all.sh](./scripts/test-all.sh) that performs all deployment and some tests on all 3 contracts. You can take a look at the different calls made to gain further insight in how these 3 contracts interact with each other.
+You can use the following flow for the most important actions:
 
-Alternatively, you can use the following flow for the most important actions:
-
-1. [./scripts/1-deploy.sh](./scripts/1-deploy.sh) to deploy all contracts
-2. [./scripts/2-initialize.sh](./scripts/2-initialize.sh) to initialize the contracts
-3. [./scripts/mintTokens.sh](./scripts/mintTokens.sh) to mint some ERC-20 tokens
-4. [./scripts/mintNft.sh](./scripts/mintNft.sh) to mint an NFT
-5. [./scripts/getBalance.sh](./scripts/getBalance.sh) to obtain the balance of the minter
-6. [./scripts/getTokenImage.sh](./scripts/getTokenImage.sh) to get the image generated for tokenId 0
-7. [./scripts/transferNft.sh](./scripts/transferNft.sh) to transfer the NFT 0 from the minter to the RECEIVER
-8. [./scripts/mintNftFromTokenContract.sh](./scripts/mintNftFromTokenContract.sh) to mint an NFT from the ERC-20 contract
-
-Remember to set the environment variables in an `.env` file.
+1. Create a copy (`.env`) and update the environment variables on [./scripts/.env.example](./scripts/.env.example)
+2. [./scripts/1-deploy.sh](./scripts/1-deploy.sh) to deploy all contracts
+3. Export all contract addresses in environment variables: ART_CONTRACT_ADDRESS, NFT_CONTRACT_ADDRESS, ERC20_CONTRACT_ADDRESS
+4. [./scripts/2-initialize.sh](./scripts/2-initialize.sh) to initialize the contracts
+5. [./scripts/mintTokens.sh](./scripts/mintTokens.sh) to mint some ERC-20 tokens
+6. [./scripts/mintNft.sh](./scripts/mintNft.sh) to mint an NFT
+7. [./scripts/getBalance.sh](./scripts/getBalance.sh) to obtain the balance of the minter
+8. [./scripts/getTokenImage.sh](./scripts/getTokenImage.sh) to get the image generated for tokenId 0
+9. [./scripts/transferNft.sh](./scripts/transferNft.sh) to transfer the NFT 0 from the minter to the RECEIVER
+10. [./scripts/mintNftFromTokenContract.sh](./scripts/mintNftFromTokenContract.sh) to mint an NFT from the ERC-20 contract
 
 ## How to run a local dev node
 
