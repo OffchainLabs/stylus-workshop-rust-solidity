@@ -2,7 +2,7 @@
 
 This repo contains an example of 3 contracts (an ERC-721 contract and an Art contract both written in Rust, and an ERC-20 contract written in Solidity) interacting with each other.
 
-The ERC-721 contract contains a basic Rust implementation of the standard, which calls the external Art contract to generate the image when invoking the `tokenURI` method. It is based on the [Stylus workshop NFT](https://github.com/OffchainLabs/stylus-workshop-nft/) and the [Stylus ERC721](https://github.com/gvladika/stylus-erc721/) implementations.
+The ERC-721 contract contains a basic Rust implementation of the standard, which calls the external Art contract to generate the image when invoking the `tokenURI` method.
 
 The Art contract contains a Rust implementation of a basic generative art algorithm that draws an image with different colors depending on the address and the token id being passed as inputs. It is based on the [Stylus workshop NFT](https://github.com/OffchainLabs/stylus-workshop-nft/) implementation.
 
@@ -61,7 +61,7 @@ cargo stylus check
 Deploy the contract
 
 ```sh
-cargo stylus deploy --private-key 0x<your private key>
+cargo stylus deploy -e $YOUR_RPC_URL --private-key $YOUR_PRIVATE_KEY
 ```
 
 Note that it's generally better to use `--private-key-path` for security reasons.
@@ -85,7 +85,7 @@ forge build
 Deploy it
 
 ```sh
-forge create --rpc-url https://stylus-testnet.arbitrum.io/rpc --private-key 0x<your private key> src/MyToken.sol:MyToken
+forge create --rpc-url $YOUR_RPC_URL --private-key $YOUR_PRIVATE_KEY src/MyToken.sol:MyToken
 ```
 
 See `forge create --help` for more information.
@@ -96,33 +96,29 @@ There's a test script available in [./scripts/test-all.sh](./scripts/test-all.sh
 
 Alternatively, you can use the following flow for the most important actions:
 
-1. [./scripts/deploy.sh](./scripts/deploy.sh) to deploy all contracts and initialize them
-2. [./scripts/mintTokens.sh](./scripts/mintTokens.sh) to mint some ERC-20 tokens
-3. [./scripts/mintNft.sh](./scripts/mintNft.sh) to mint an NFT
-4. [./scripts/getBalance.sh](./scripts/getBalance.sh) to obtain the balance of the minter
-5. [./scripts/getTokenImage.sh](./scripts/getTokenImage.sh) to get the image generated for tokenId 0
-6. [./scripts/transferNft.sh](./scripts/transferNft.sh) to transfer the NFT 0 from the minter to the RECEIVER
-7. [./scripts/mintNftFromTokenContract.sh](./scripts/mintNftFromTokenContract.sh) to mint an NFT from the ERC-20 contract
+1. [./scripts/1-deploy.sh](./scripts/1-deploy.sh) to deploy all contracts
+2. [./scripts/2-initialize.sh](./scripts/2-initialize.sh) to initialize the contracts
+3. [./scripts/mintTokens.sh](./scripts/mintTokens.sh) to mint some ERC-20 tokens
+4. [./scripts/mintNft.sh](./scripts/mintNft.sh) to mint an NFT
+5. [./scripts/getBalance.sh](./scripts/getBalance.sh) to obtain the balance of the minter
+6. [./scripts/getTokenImage.sh](./scripts/getTokenImage.sh) to get the image generated for tokenId 0
+7. [./scripts/transferNft.sh](./scripts/transferNft.sh) to transfer the NFT 0 from the minter to the RECEIVER
+8. [./scripts/mintNftFromTokenContract.sh](./scripts/mintNftFromTokenContract.sh) to mint an NFT from the ERC-20 contract
 
 Remember to set the environment variables in an `.env` file.
 
-## How to run a local Stylus dev node
+## How to run a local dev node
 
-Instructions to setup a local Stylus dev node can be found [here](https://docs.arbitrum.io/stylus/how-tos/local-stylus-dev-node).
-
-## How to get ETH for the Stylus testnet
-
-The Stylus testnet is an L3 chain that settles to Arbitrum Sepolia. The usual way of obtaining ETH is to bridge it from Arbitrum Sepolia through the [Arbitrum Bridge](https://bridge.arbitrum.io/?destinationChain=stylus-testnet&sourceChain=arbitrum-sepolia). You can find a list of Arbitrum Sepolia faucets [here](https://docs.arbitrum.io/stylus/reference/testnet-information#faucets).
+Instructions to setup a local dev node can be found [here](https://docs.arbitrum.io/run-arbitrum-node/run-local-dev-node).
 
 ## Useful resources
 
 - [Stylus quickstart](https://docs.arbitrum.io/stylus/stylus-quickstart)
-- [Stylus by example](https://arbitrum-stylus-by-example.vercel.app/)
+- [Stylus by example](https://stylus-by-example.org/)
 - [Awesome Stylus](https://github.com/OffchainLabs/awesome-stylus)
-- [Counter program](https://github.com/OffchainLabs/stylus-workshop-counter)
+- [Counter contract](https://github.com/OffchainLabs/stylus-workshop-counter)
 - [Interactions between Rust and Solidity](https://github.com/OffchainLabs/stylus-workshop-rust-solidity/)
-- [Workshop video presentation](https://www.youtube.com/watch?v=Q8LKxO-gx4U)
-- [Presentation slides](https://docs.google.com/presentation/d/1jhdKN_IwZziIKoIO_YAUqOjA44sRu8vSTXNfa_2RGkk/edit?usp=sharing)
+- [Presentation slides](https://docs.google.com/presentation/d/e/2PACX-1vQB44hpWHBig5REVntjxK-Djs8p1XuQB26pg0ouldTWxTaaYpK3awEV4A8Spv9Z3nCr-473ix853sbr/pub?start=false&loop=false&delayms=3000)
 - [Telegram group](https://t.me/arbitrum_stylus)
 - [Discord channel](https://discord.com/channels/585084330037084172/1146789176939909251)
 
